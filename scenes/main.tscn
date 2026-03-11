@@ -1,0 +1,93 @@
+[gd_scene load_steps=7 format=3 uid="uid://main_scene"]
+
+[ext_resource type="Script" path="res://scripts/core/GameManager.cs" id="1_gm"]
+[ext_resource type="Script" path="res://scripts/fps/GameHud.cs" id="2_hud"]
+[ext_resource type="Script" path="res://scripts/builder/Builder.cs" id="3_builder"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SubResource_sky"]
+sky_top_color = Color(0.385, 0.455, 0.55, 1)
+sky_horizon_color = Color(0.647, 0.655, 0.671, 1)
+ground_bottom_color = Color(0.2, 0.169, 0.133, 1)
+ground_horizon_color = Color(0.647, 0.655, 0.671, 1)
+
+[sub_resource type="Sky" id="SubResource_sky2"]
+sky_material = SubResource("SubResource_sky")
+
+[sub_resource type="Environment" id="SubResource_env"]
+background_mode = 2
+sky = SubResource("SubResource_sky2")
+tonemap_mode = 2
+ssao_enabled = true
+glow_enabled = true
+
+[node name="Main" type="Node3D"]
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("SubResource_env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866, -0.434, 0.25, 0, 0.499, 0.866, -0.5, 0.75, -0.433, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+
+[node name="FloorMesh" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("SubResource_floor_mesh")
+
+[node name="FloorShape" type="CollisionShape3D" parent="Floor"]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("2_hud")
+
+[node name="Health" type="Label" parent="HUD"]
+offset_left = 20.0
+offset_top = 10.0
+offset_right = 200.0
+offset_bottom = 50.0
+text = "100%"
+
+[node name="Coins" type="Label" parent="HUD"]
+offset_left = 20.0
+offset_top = 40.0
+offset_right = 200.0
+offset_bottom = 80.0
+text = "0"
+
+[node name="Cash" type="Label" parent="HUD"]
+offset_left = 20.0
+offset_top = 70.0
+offset_right = 200.0
+offset_bottom = 110.0
+text = "$10000"
+visible = false
+
+[node name="Mode" type="Label" parent="HUD"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -50.0
+offset_top = 10.0
+offset_right = 50.0
+offset_bottom = 50.0
+text = "COMBAT"
+
+[node name="Crosshair" type="TextureRect" parent="HUD"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+
+[node name="GridMap" type="GridMap" parent="."]
+cell_size = Vector3(1, 1, 1)
+
+[node name="Builder" type="Node3D" parent="."]
+script = ExtResource("3_builder")
+
+[node name="Selector" type="Node3D" parent="Builder"]
+
+[node name="SelectorContainer" type="Node3D" parent="Builder/Selector"]
