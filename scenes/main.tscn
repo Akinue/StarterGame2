@@ -1,29 +1,76 @@
-[gd_scene load_steps=7 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=33 format=3]
 
-[ext_resource type="Script" path="res://scripts/core/GameManager.cs" id="1_gm"]
-[ext_resource type="Script" path="res://scripts/fps/GameHud.cs" id="2_hud"]
-[ext_resource type="Script" path="res://scripts/builder/Builder.cs" id="3_builder"]
+[ext_resource type="Script" path="res://scripts/fps/GameHud.cs" id="hud_script"]
+[ext_resource type="Script" path="res://scripts/builder/Builder.cs" id="builder_script"]
+[ext_resource type="Script" path="res://scripts/builder/StructureResource.cs" id="struct_script"]
+[ext_resource type="PackedScene" path="res://objects/fps/player.tscn" id="player_scene"]
+[ext_resource type="Resource" path="res://structures/road-straight.tres" id="s1"]
+[ext_resource type="Resource" path="res://structures/road-straight-lightposts.tres" id="s2"]
+[ext_resource type="Resource" path="res://structures/road-corner.tres" id="s3"]
+[ext_resource type="Resource" path="res://structures/road-intersection.tres" id="s4"]
+[ext_resource type="Resource" path="res://structures/road-split.tres" id="s5"]
+[ext_resource type="Resource" path="res://structures/pavement.tres" id="s6"]
+[ext_resource type="Resource" path="res://structures/pavement-fountain.tres" id="s7"]
+[ext_resource type="Resource" path="res://structures/grass.tres" id="s8"]
+[ext_resource type="Resource" path="res://structures/grass-trees.tres" id="s9"]
+[ext_resource type="Resource" path="res://structures/grass-trees-tall.tres" id="s10"]
+[ext_resource type="Resource" path="res://structures/building-small-a.tres" id="s11"]
+[ext_resource type="Resource" path="res://structures/building-small-b.tres" id="s12"]
+[ext_resource type="Resource" path="res://structures/building-small-c.tres" id="s13"]
+[ext_resource type="Resource" path="res://structures/building-small-d.tres" id="s14"]
+[ext_resource type="Resource" path="res://structures/building-garage.tres" id="s15"]
+[ext_resource type="Environment" path="res://scenes/main-environment.tres" id="main_env"]
+[ext_resource type="Script" path="res://scripts/core/LevelGenerator.cs" id="level_gen_script"]
+[ext_resource type="FontFile" path="res://fonts/lilita_one_regular.ttf" id="lilita_font"]
+[ext_resource type="Texture2D" path="res://sprites/platformer/coin.png" id="coin_sprite"]
+[ext_resource type="Texture2D" path="res://sprites/ui/bar_bg.png" id="bar_bg_tex"]
+[ext_resource type="Texture2D" path="res://sprites/ui/bar_fill_green.png" id="bar_fill_tex"]
+[ext_resource type="Texture2D" path="res://sprites/fps/crosshair.png" id="crosshair_tex"]
 
-[sub_resource type="ProceduralSkyMaterial" id="SubResource_sky"]
-sky_top_color = Color(0.385, 0.455, 0.55, 1)
-sky_horizon_color = Color(0.647, 0.655, 0.671, 1)
-ground_bottom_color = Color(0.2, 0.169, 0.133, 1)
-ground_horizon_color = Color(0.647, 0.655, 0.671, 1)
+[sub_resource type="PlaneMesh" id="floor_mesh"]
+size = Vector2(100, 100)
 
-[sub_resource type="Sky" id="SubResource_sky2"]
-sky_material = SubResource("SubResource_sky")
+[sub_resource type="WorldBoundaryShape3D" id="floor_shape"]
 
-[sub_resource type="Environment" id="SubResource_env"]
-background_mode = 2
-sky = SubResource("SubResource_sky2")
-tonemap_mode = 2
-ssao_enabled = true
-glow_enabled = true
+[sub_resource type="StandardMaterial3D" id="floor_mat"]
+albedo_color = Color(0.545, 0.671, 0.573, 1)
+
+[sub_resource type="LabelSettings" id="hud_font"]
+font = ExtResource("lilita_font")
+font_size = 20
+font_color = Color(1, 1, 1, 1)
+outline_size = 3
+outline_color = Color(0, 0, 0, 0.5)
+
+[sub_resource type="LabelSettings" id="hud_font_lg"]
+font = ExtResource("lilita_font")
+font_size = 28
+font_color = Color(1, 1, 1, 1)
+outline_size = 4
+outline_color = Color(0, 0, 0, 0.6)
+
+[sub_resource type="LabelSettings" id="hud_font_sm"]
+font = ExtResource("lilita_font")
+font_size = 14
+font_color = Color(1, 1, 1, 0.6)
+outline_size = 2
+outline_color = Color(0, 0, 0, 0.4)
+
+[sub_resource type="StyleBoxFlat" id="panel_style"]
+bg_color = Color(0, 0, 0, 0.35)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
 
 [node name="Main" type="Node3D"]
 
 [node name="Environment" type="WorldEnvironment" parent="."]
-environment = SubResource("SubResource_env")
+environment = ExtResource("main_env")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866, -0.434, 0.25, 0, 0.499, 0.866, -0.5, 0.75, -0.433, 0, 0, 0)
@@ -32,44 +79,100 @@ shadow_enabled = true
 [node name="Floor" type="StaticBody3D" parent="."]
 
 [node name="FloorMesh" type="MeshInstance3D" parent="Floor"]
-mesh = SubResource("SubResource_floor_mesh")
+mesh = SubResource("floor_mesh")
+surface_material_override/0 = SubResource("floor_mat")
 
 [node name="FloorShape" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("floor_shape")
+
+[node name="Player" parent="." instance=ExtResource("player_scene")]
+Crosshair = NodePath("../HUD/Crosshair")
 
 [node name="HUD" type="CanvasLayer" parent="."]
-script = ExtResource("2_hud")
+script = ExtResource("hud_script")
 
-[node name="Health" type="Label" parent="HUD"]
-offset_left = 20.0
+[node name="StatsPanel" type="PanelContainer" parent="HUD"]
+offset_left = 10.0
 offset_top = 10.0
-offset_right = 200.0
-offset_bottom = 50.0
-text = "100%"
+offset_right = 280.0
+offset_bottom = 110.0
+theme_override_styles/panel = SubResource("panel_style")
 
-[node name="Coins" type="Label" parent="HUD"]
-offset_left = 20.0
-offset_top = 40.0
-offset_right = 200.0
-offset_bottom = 80.0
+[node name="VBox" type="VBoxContainer" parent="HUD/StatsPanel"]
+theme_override_constants/separation = 6
+
+[node name="HealthRow" type="HBoxContainer" parent="HUD/StatsPanel/VBox"]
+theme_override_constants/separation = 8
+
+[node name="HealthIcon" type="Label" parent="HUD/StatsPanel/VBox/HealthRow"]
+label_settings = SubResource("hud_font")
+text = "HP"
+
+[node name="HealthBar" type="TextureProgressBar" parent="HUD/StatsPanel/VBox/HealthRow"]
+custom_minimum_size = Vector2(150, 26)
+size_flags_vertical = 4
+max_value = 100.0
+value = 100.0
+nine_patch_stretch = true
+stretch_margin_left = 8
+stretch_margin_right = 8
+stretch_margin_top = 4
+stretch_margin_bottom = 4
+texture_under = ExtResource("bar_bg_tex")
+texture_progress = ExtResource("bar_fill_tex")
+
+[node name="HealthValue" type="Label" parent="HUD/StatsPanel/VBox/HealthRow"]
+label_settings = SubResource("hud_font")
+text = "100"
+
+[node name="CoinRow" type="HBoxContainer" parent="HUD/StatsPanel/VBox"]
+theme_override_constants/separation = 8
+
+[node name="CoinIcon" type="TextureRect" parent="HUD/StatsPanel/VBox/CoinRow"]
+custom_minimum_size = Vector2(24, 24)
+size_flags_vertical = 4
+texture = ExtResource("coin_sprite")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CoinValue" type="Label" parent="HUD/StatsPanel/VBox/CoinRow"]
+label_settings = SubResource("hud_font")
 text = "0"
 
-[node name="Cash" type="Label" parent="HUD"]
-offset_left = 20.0
-offset_top = 70.0
-offset_right = 200.0
-offset_bottom = 110.0
-text = "$10000"
+[node name="CashRow" type="HBoxContainer" parent="HUD/StatsPanel/VBox"]
 visible = false
+theme_override_constants/separation = 8
 
-[node name="Mode" type="Label" parent="HUD"]
+[node name="CashIcon" type="Label" parent="HUD/StatsPanel/VBox/CashRow"]
+label_settings = SubResource("hud_font")
+text = "$"
+
+[node name="CashValue" type="Label" parent="HUD/StatsPanel/VBox/CashRow"]
+label_settings = SubResource("hud_font")
+text = "10000"
+
+[node name="ModeLabel" type="Label" parent="HUD"]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -50.0
+offset_left = -70.0
 offset_top = 10.0
-offset_right = 50.0
+offset_right = 70.0
 offset_bottom = 50.0
+label_settings = SubResource("hud_font_lg")
 text = "COMBAT"
+horizontal_alignment = 1
+
+[node name="SeedLabel" type="Label" parent="HUD"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -30.0
+offset_right = 250.0
+offset_bottom = -5.0
+label_settings = SubResource("hud_font_sm")
+text = ""
 
 [node name="Crosshair" type="TextureRect" parent="HUD"]
 anchors_preset = 8
@@ -81,13 +184,23 @@ offset_left = -16.0
 offset_top = -16.0
 offset_right = 16.0
 offset_bottom = 16.0
+texture = ExtResource("crosshair_tex")
 
 [node name="GridMap" type="GridMap" parent="."]
 cell_size = Vector3(1, 1, 1)
 
 [node name="Builder" type="Node3D" parent="."]
-script = ExtResource("3_builder")
+script = ExtResource("builder_script")
+Structures = Array[ExtResource("struct_script")]([ExtResource("s1"), ExtResource("s2"), ExtResource("s3"), ExtResource("s4"), ExtResource("s5"), ExtResource("s6"), ExtResource("s7"), ExtResource("s8"), ExtResource("s9"), ExtResource("s10"), ExtResource("s11"), ExtResource("s12"), ExtResource("s13"), ExtResource("s14"), ExtResource("s15")])
+ViewCamera = NodePath("../Player/Head/Camera")
+Gridmap = NodePath("../GridMap")
+Selector = NodePath("Selector")
+SelectorContainer = NodePath("Selector/SelectorContainer")
+CashDisplay = NodePath("../HUD/StatsPanel/VBox/CashRow/CashValue")
 
 [node name="Selector" type="Node3D" parent="Builder"]
 
 [node name="SelectorContainer" type="Node3D" parent="Builder/Selector"]
+
+[node name="LevelGenerator" type="Node3D" parent="."]
+script = ExtResource("level_gen_script")
